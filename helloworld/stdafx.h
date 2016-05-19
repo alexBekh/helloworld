@@ -5,11 +5,15 @@
 
 #pragma once
 
-#include "targetver.h"
+//#include "targetver.h"
+#include <sstream>
+#include <iostream>
 
-#include <stdio.h>
-#include <tchar.h>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
-
+#include "Options.h"
+using namespace options;
+ 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
