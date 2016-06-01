@@ -10,30 +10,30 @@ void State::setEvent(const sf::Event& e)
 	}
 }
 
-IntroState::IntroState(Context* c): State(c)
+bool State::isStarted() const
 {
-	pong.options = c->getOptions();
-	pong.options.font = c->getResources().font;
-	pong.create("borsPong", Size::BIG);
-	pong.setPositionOnScreen(Position::TOP);
+	return started;
+}
 
-	options.options = c->getOptions();
-	options.options.font = c->getResources().font;
-	options.create("options", Size::MIDDLE);
-	options.setPositionOnScreen(RelativePosition::UNDER, pong);
+State::State(Context* context) : c(context)
+{
+	if (!c)
+		throw std::exception("State: null context ptr");
+}
 
-	start.options = c->getOptions();
-	start.options.font = c->getResources().font;
-	start.create("start", Size::LITTLE);
-	start.setPositionOnScreen(Position::BOTTOM);
+void State::start()
+{
+	started = true;
+}
 
-	music = c->getMusic();
-	music->play();
+IntroState::IntroState(Context* c) : State(c)
+{
 }
 
 IntroState::~IntroState()
 {
-	music->stop();
+	if (music->getStatus()==sf::Music::Status::Playing)
+		music->stop();
 }
 
 void IntroState::setEvent(const sf::Event& e)
@@ -55,50 +55,51 @@ void IntroState::setEvent(const sf::Event& e)
 	}
 }
 
+void IntroState::start()
+{
+	pong.options = c->getOptions();
+	pong.options.font = c->getResources().font;
+	pong.create("borsPong", Size::BIG);
+	pong.setPositionOnScreen(Position::TOP);
+
+	gameOptions.options = c->getOptions();
+	gameOptions.options.font = c->getResources().font;
+	gameOptions.create("options", Size::MIDDLE);
+	gameOptions.setPositionOnScreen(RelativePosition::UNDER, pong);
+
+	startGame.options = c->getOptions();
+	startGame.options.font = c->getResources().font;
+	startGame.create("start", Size::LITTLE);
+	startGame.setPositionOnScreen(Position::BOTTOM);
+
+	music = c->getMusic();
+	music->play();
+
+	State::start();
+}
+
+void IntroState::update()
+{
+	if (!isStarted())
+		start();
+}
+
 void IntroState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(pong, states);
-	target.draw(start, states);
-	target.draw(options, states);
+	target.draw(startGame, states);
+	target.draw(gameOptions, states);
 }
 
 ReadySteadyGoState::ReadySteadyGoState(Context* c) : State(c)
 {
-	readySound.setBuffer(c->getResources().audio.sound1);
-	goSound.setBuffer(c->getResources().audio.sound4);
-
-	ready.options = c->getOptions();
-	ready.create("ready..", Size::LITTLE);
-	ready.setPositionOnScreen(Position::CENTER);
-	CountDownState cdsReady;
-	cdsReady.setText(ready).setSound(readySound).setDelay(sf::seconds(0.5));
-
-	steady.options = c->getOptions();
-	steady.create("steady..", Size::MIDDLE);
-	steady.setPositionOnScreen(Position::CENTER);
-	CountDownState cdsSteady;
-	cdsSteady.setText(ready).setSound(readySound).setDelay(sf::seconds(0.5));
-
-	go.options = c->getOptions();
-	go.create("ready..", Size::BIG);
-	go.setPositionOnScreen(Position::CENTER);
-	CountDownState cdsGo;
-	cdsGo.setText(go).setSound(goSound).setDelay(sf::seconds(1));
-
-	CountDownInterspace interspace;
-
-	countDown.push_back(cdsReady);
-	countDown.push_back(interspace);
-	countDown.push_back(cdsSteady);
-	countDown.push_back(interspace);
-	countDown.push_back(cdsGo);
-
-	sf::sleep(sf::seconds(1));
-	c->getBall().start();
 }
 
 void ReadySteadyGoState::update()
 {
+	if (!isStarted())
+		start();
+
 	countDown.front().update();
 
 	if (countDown.front().isTimeUp())
@@ -118,8 +119,51 @@ void ReadySteadyGoState::setEvent(const sf::Event& e)
 	}
 }
 
+void ReadySteadyGoState::start()
+{
+	readySound.setBuffer(c->getResources().audio.sound1);
+	goSound.setBuffer(c->getResources().audio.sound4);
+
+	ready.options = c->getOptions();
+	ready.options.font = c->getResources().font;
+	ready.create("ready..", Size::LITTLE);
+	ready.setPositionOnScreen(Position::CENTER);
+	CountDownState cdsReady;
+	cdsReady.setText(ready).setSound(readySound).setDelay(sf::seconds(0.5));
+
+	steady.options = c->getOptions();
+	steady.options.font = c->getResources().font;
+	steady.create("steady..", Size::MIDDLE);
+	steady.setPositionOnScreen(Position::CENTER);
+	CountDownState cdsSteady;
+	cdsSteady.setText(steady).setSound(readySound).setDelay(sf::seconds(0.5));
+
+	go.options = c->getOptions();
+	go.options.font = c->getResources().font;
+	go.create("go!", Size::BIG);
+	go.setPositionOnScreen(Position::CENTER);
+	CountDownState cdsGo;
+	cdsGo.setText(go).setSound(goSound).setDelay(sf::seconds(1));
+
+	CountDownInterspace interspace;
+
+	countDown.push_back(cdsReady);
+	countDown.push_back(interspace);
+	countDown.push_back(cdsSteady);
+	countDown.push_back(interspace);
+	countDown.push_back(cdsGo);
+
+	sf::sleep(sf::seconds(1));
+	c->getBall().start();
+
+	State::start();
+}
+
 void ReadySteadyGoState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+	target.draw(c->getPlayer1(), states);
+	target.draw(c->getPlayer2(), states);
+	target.draw(c->getScore(), states);
 	target.draw(countDown.front(), states);
 }
 
@@ -177,6 +221,17 @@ void OptionsState::setEvent(const sf::Event& e)
 	State::setEvent(e);
 }
 
+void OptionsState::start()
+{
+	State::start();
+}
+
+void OptionsState::update()
+{
+	if (!isStarted())
+		start();
+}
+
 void OptionsState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(options, states);
@@ -187,6 +242,40 @@ void OptionsState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 }
 
 GameState::GameState(Context* c) : State(c)
+{
+}
+
+void GameState::setEvent(const sf::Event& e)
+{
+	State::setEvent(e);
+}
+
+void GameState::update()
+{
+	if (!isStarted())
+		start();
+
+	c->getPlayer1().update();
+	c->getPlayer2().update();
+	c->getBall().update();
+
+	if (c->getBall().tryLeft(c->getPlayer1().racket.getGlobalBounds()))
+		c->getPlayer1().options.sound.play();
+
+	if (c->getBall().tryRight(c->getPlayer2().racket.getGlobalBounds()))
+		c->getPlayer2().options.sound.play();
+
+	if ((c->getBall().isMissedLeft() && ++c->getPlayer1().missCount)
+		||
+		(c->getBall().isMissedRight() && ++c->getPlayer2().missCount))
+	{
+		c->getBall().options.sound.play();
+		c->getScore().update();
+		c->setState(std::make_shared<ReadySteadyGoState>(c));
+	}
+}
+
+void GameState::start()
 {
 	c->getPlayer1().options.gameField = c->getOptions().gameField;
 	c->getPlayer1().options.sound.setBuffer(c->getResources().audio.sound1);
@@ -203,11 +292,11 @@ GameState::GameState(Context* c) : State(c)
 	c->getScore().options.p1 = &c->getPlayer1();
 	c->getScore().options.p2 = &c->getPlayer2();
 	c->getScore().options.shape.size = Size::LITTLE;
-	c->getScore().options.fontName = "../res/ARCADECLASSIC.TTF";
-	c->getScore().options.sound.setBuffer(c->getResources().audio.sound3);
-
+	c->getScore().options.font = c->getResources().font;
+	
 	c->getBall().options.gameField = c->getOptions().gameField;
 	c->getBall().options.speed = Speed::FAST;
+	c->getBall().options.sound.setBuffer(c->getResources().audio.sound3);
 
 	c->getMusic()->setLoop(true);
 	c->getMusic()->setVolume(30);
@@ -218,32 +307,8 @@ GameState::GameState(Context* c) : State(c)
 	c->getScore().create();
 
 	c->setState(std::make_shared<ReadySteadyGoState>(c));
-}
 
-void GameState::setEvent(const sf::Event& e)
-{
-	State::setEvent(e);
-}
-
-void GameState::update()
-{
-	c->getPlayer1().update();
-	c->getPlayer2().update();
-	c->getBall().update();
-
-	if (c->getBall().tryLeft(c->getPlayer1().racket.getGlobalBounds()))
-		c->getPlayer1().options.sound.play();
-
-	if (c->getBall().tryRight(c->getPlayer2().racket.getGlobalBounds()))
-		c->getPlayer2().options.sound.play();
-
-	if ((c->getBall().isMissedLeft() && ++c->getPlayer1().missCount)
-		||
-		(c->getBall().isMissedRight() && ++c->getPlayer2().missCount))
-	{
-		c->getScore().update();
-		c->setState(std::make_shared<ReadySteadyGoState>(c));
-	}
+	State::start();
 }
 
 void GameState::draw(sf::RenderTarget& target, sf::RenderStates states) const

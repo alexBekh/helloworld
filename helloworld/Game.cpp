@@ -28,11 +28,11 @@ void Game::applySettings()
 	score.options.p1 = &p1;
 	score.options.p2 = &p2;
 	score.options.shape.size = Size::LITTLE;
-	score.options.fontName = "../res/ARCADECLASSIC.TTF";
-	score.options.sound.setBuffer(res.audio.sound3);
-
+	score.options.font = res.font;
+	
 	ball.options.gameField = options.gameField;
 	ball.options.speed = Speed::FAST;
+	ball.options.sound.setBuffer(res.audio.sound3);
 
 	res.audio.music.setLoop(true);
 	res.audio.music.setVolume(30);
@@ -73,6 +73,7 @@ sf::Music* Game::getMusic()
 void Game::setState(std::shared_ptr<State> state)
 {
 	states.push_back(state);
+	state->start();
 }
 
 void Game::backToPrevState()
@@ -107,7 +108,7 @@ bool Game::loadResources()
 {
 	if (!res.audio.sound1.loadFromFile("../res/Beep1.wav"))
 		return false;
-	if (!res.audio.sound1.loadFromFile("../res/Beep2.wav"))
+	if (!res.audio.sound2.loadFromFile("../res/Beep2.wav"))
 		return false;
 	if (!res.audio.sound3.loadFromFile("../res/Beep8.wav"))
 		return false;

@@ -29,19 +29,20 @@ class State
 	: public sf::Drawable
 {
 public:
-	State(Context* context): c(context)
-	{
-		if (!c)
-			throw std::exception("State: null context ptr");
-	}
+	State(Context* context);
+	virtual void start();
 	virtual void setEvent(const sf::Event& e);
-	virtual void update() {}
+	virtual void update() = 0;
+	bool isStarted() const;
+
+protected:
+	Context* c;
 
 private:
 	State(){}
 
-protected:
-	Context* c;
+private:
+	bool started = false;
 };
 
 
@@ -50,15 +51,15 @@ class IntroState : public State
 public:
 	IntroState(Context* c);
 	~IntroState();
-
-
 	virtual void setEvent(const sf::Event& e) override;
+	virtual void start() override;
+	virtual void update() override;
 
 protected:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:
-	TextOnScreen pong, player1, player2, start, options;
+	TextOnScreen pong, player1, player2, startGame, gameOptions;
 	sf::Music * music;
 };
 
@@ -69,6 +70,7 @@ public:
 	ReadySteadyGoState(Context* c);
 	virtual void update() override;
 	virtual void setEvent(const sf::Event& e) override;
+	virtual void start() override;
 
 protected:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -118,11 +120,10 @@ private:
 class OptionsState : public State
 {
 public:
-	OptionsState(Context* c) : State(c) {
-
-	}
-
+	OptionsState(Context* c) : State(c) {}
 	virtual void setEvent(const sf::Event& e) override;
+	virtual void start() override;
+	virtual void update() override;
 
 protected:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -139,6 +140,7 @@ public:
 
 	virtual void setEvent(const sf::Event& e) override;
 	virtual void update() override;
+	virtual void start() override;
 
 protected:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

@@ -9,21 +9,20 @@ class Score :
 public:
 	Score();
 	~Score();
-	bool loadFont();
 	void create();
 	void update();
-	void setCountString();
+	void updateCountString();
 
 protected:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
+private:
+	std::string makeCountString() const;
 public:
-	sf::Font font;
-	sf::Text text;
+	TextOnScreen text;
 	
-	struct Options: base::PlayableOptions
+	struct Options: TextOnScreen::Options
 	{
-		std::string fontName;
 		const Player *p1, *p2;
 	}
 	options;
