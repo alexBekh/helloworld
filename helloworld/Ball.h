@@ -1,6 +1,6 @@
 #pragma once
-#include "F:\coding\SFML-2.3.2\include\SFML\Graphics\Transformable.hpp"
-#include "Options.h"
+#include <SFML\Graphics.hpp>
+#include "base.h"
 
 
 class Ball :
@@ -14,12 +14,13 @@ public:
 	void create();
 	void start();
 	void update();
-
-	bool tryBottom();
-
-	bool tryTop();
-
+	void tryUpDown();
 	bool tryLeft(const sf::FloatRect& leftRacket);
+
+	//void reflect(float x, float y);
+	void reflectX(float x);
+	void reflectY(float y);
+
 	bool tryRight(const sf::FloatRect& rightRacket);
 	bool tryDeadZone(const sf::FloatRect &racket);
 	bool isMissedLeft();
@@ -31,7 +32,7 @@ protected:
 public:
 	sf::CircleShape ballShape;
 	sf::Vector2f velocity;
-	Options options;
+	PlayableOptions options;
 	float speed;
 	sf::Clock clock;
 	sf::FloatRect bounds;

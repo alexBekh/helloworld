@@ -18,13 +18,13 @@ void Player::createRacket()
 
 	switch (options.shape.size)
 	{
-	case Options::Shape::Size::BIG:
+	case Size::BIG:
 		size.y = options.gameField.height / 2;
 		break;
-	case Options::Shape::Size::MIDDLE:
+	case Size::MIDDLE:
 		size.y = options.gameField.height / 3;
 		break;
-	case Options::Shape::Size::LITTLE:
+	case Size::LITTLE:
 		size.y = options.gameField.height / 4;
 		break;
 	}
@@ -47,14 +47,14 @@ void Player::createRacket()
 
 	switch (options.speed)
 	{
-	case Options::Speed::SLOW:
-		speed = ratio * 0.1;
+	case Speed::SLOW:
+		speed = ratio * 0.1f;
 		break;
-	case Options::Speed::NORMAL:
-		speed = ratio * 0.25;
+	case Speed::NORMAL:
+		speed = ratio * 0.25f;
 		break;
-	case Options::Speed::FAST:
-		speed = ratio * 0.5;
+	case Speed::FAST:
+		speed = ratio * 0.5f;
 		break;
 	}
 	std::cout << options.name <<" speed=" << speed << std::endl;

@@ -11,13 +11,17 @@ Score::~Score()
 {
 }
 
-bool Score::create()
+bool Score::loadFont()
 {
 	if (!font.loadFromFile(options.fontName))
 		return false;
 
 	text.setFont(font);
+	return true;
+}
 
+void Score::create()
+{
 	setCountString();
 
 	float size;
@@ -26,13 +30,13 @@ bool Score::create()
 
 	switch (options.shape.size)
 	{
-	case Options::Shape::Size::BIG:
+	case Size::BIG:
 		size = diagonal / 10;
 		break;
-	case Options::Shape::Size::MIDDLE:
+	case Size::MIDDLE:
 		size = diagonal / 20;
 		break;
-	case Options::Shape::Size::LITTLE:
+	case Size::LITTLE:
 		size = diagonal / 30;
 		break;
 	}
@@ -43,12 +47,12 @@ bool Score::create()
 		options.gameField.top);
 
 	std::cout << "Score size=" << size << std::endl;
-	return true;
 }
 
 void Score::update()
 {
 	setCountString();
+	options.sound.play();
 }
 
 void Score::setCountString()

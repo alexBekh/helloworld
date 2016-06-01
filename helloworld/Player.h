@@ -1,6 +1,6 @@
 #pragma once
-#include "F:\coding\SFML-2.3.2\include\SFML\Graphics\Drawable.hpp"
-#include "Options.h"
+#include <SFML\Graphics.hpp>
+#include "base.h"
 
 class Player :
 	public sf::Drawable
@@ -18,7 +18,7 @@ public:
 	int missCount = 0;
 	float speed;
 
-	struct Options: options::Options
+	struct Options: base::PlayableOptions
 	{
 		enum class Side {LEFT, RIGHT} side = Side::LEFT;
 

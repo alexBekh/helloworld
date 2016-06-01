@@ -8,12 +8,13 @@
 //#include "targetver.h"
 #include <sstream>
 #include <iostream>
+#include <memory>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
-#include "Options.h"
-using namespace options;
+#include "base.h"
+using namespace base;
  
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
