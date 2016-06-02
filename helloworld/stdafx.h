@@ -13,6 +13,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
+#include <Box2D/Box2D.h>
+
 #include "base.h"
 using namespace base;
  

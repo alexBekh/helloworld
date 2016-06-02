@@ -11,9 +11,11 @@ namespace base
 		setSize(size);
 		setColor(options.shape.color);
 
-		float halfWidth = getLocalBounds().width / 2;
-		float halfHeight = getLocalBounds().height / 2;
-		setOrigin(halfWidth, halfHeight);
+		sf::FloatRect locBounds = this->getLocalBounds();
+
+		float halfWidth = locBounds.width / 2;
+		float halfHeight = locBounds.height / 2;
+		setOrigin(locBounds.left + halfWidth, locBounds.top + halfHeight);
 
 		isCreated = true;
 	}
@@ -23,8 +25,8 @@ namespace base
 		if (!isCreated)
 			std::exception("TextOnScreen hasn't been created");
 
-		float halfWidth = getLocalBounds().width / 2;
-		float halfHeight = getLocalBounds().height / 2;
+		float halfWidth = getGlobalBounds().width / 2;
+		float halfHeight = getGlobalBounds().height / 2;
 
 		sf::Vector2f center;
 
@@ -68,14 +70,15 @@ namespace base
 		if (!isCreated)
 			std::exception("TextOnScreen hasn't been created");
 
-		const float halfWidth = getLocalBounds().width / 2;
-		const float halfHeight = getLocalBounds().height / 2;
+		const float halfWidth = getGlobalBounds().width / 2;
+		const float halfHeight = getGlobalBounds().height / 2;
 		
-		const float relHalfWidth = rel.getLocalBounds().width / 2;
-		const float relHalfHeight = rel.getLocalBounds().height / 2;
+		const float relHalfWidth = rel.getGlobalBounds().width / 2;
+		const float relHalfHeight = rel.getGlobalBounds().height / 2;
 
-		const float horizOffset = relHalfWidth + halfWidth;
-		const float vertOffset = relHalfHeight + halfHeight;
+		static const float SPACE = 10.f;
+		const float horizOffset = relHalfWidth + halfWidth + SPACE;
+		const float vertOffset = relHalfHeight + halfHeight + SPACE;
 
 		sf::Vector2f center = rel.getPosition();
 

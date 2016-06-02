@@ -96,6 +96,7 @@
       <Filter>Файлы ресурсов</Filter>
     </None>
     <None Include="ClassDiagram.cd" />
+    <None Include="GameState" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="helloworld.rc">

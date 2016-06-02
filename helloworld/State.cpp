@@ -66,7 +66,8 @@ void IntroState::start()
 	gameOptions.options.font = c->getResources().font;
 	gameOptions.create("options", Size::MIDDLE);
 	gameOptions.setPositionOnScreen(RelativePosition::UNDER, pong);
-
+	//gameOptions.setPositionOnScreen(Position::CENTER);
+	
 	startGame.options = c->getOptions();
 	startGame.options.font = c->getResources().font;
 	startGame.create("start", Size::LITTLE);
@@ -241,7 +242,9 @@ void OptionsState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(racketSize, states);
 }
 
-GameState::GameState(Context* c) : State(c)
+GameState::GameState(Context* c)
+	: State(c)
+	, world(b2Vec2(0.f, -10.f))
 {
 }
 
@@ -319,4 +322,67 @@ void GameState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(c->getScore(), states);
 }
 
+void GameState::bindWithBox2d()
+{
+	b2Body* ground;
+	{
+		b2BodyDef bd;
+		bd.position.Set(0.0f, 20.0f);
+		ground = world.CreateBody(&bd);
+
+		b2EdgeShape shape;
+
+		b2FixtureDef sd;
+		sd.shape = &shape;
+		sd.density = 0.0f;
+		sd.restitution = 0.4f;
+
+		c->getOptions().gameField;
+		// Left vertical
+		shape.Set(b2Vec2(-20.f, -20.0f), b2Vec2(-20.0f, 20.0f));
+		ground->CreateFixture(&sd);
+
+		// Right vertical
+		shape.Set(b2Vec2(20.0f, -20.0f), b2Vec2(20.0f, 20.0f));
+		ground->CreateFixture(&sd);
+
+		// Top horizontal
+		shape.Set(b2Vec2(-20.0f, 20.0f), b2Vec2(20.0f, 20.0f));
+		ground->CreateFixture(&sd);
+
+		// Bottom horizontal
+		shape.Set(b2Vec2(-20.0f, -20.0f), b2Vec2(20.0f, -20.0f));
+		ground->CreateFixture(&sd);
+	}
+
+	// Define the dynamic body. We set its position and call the body factory.
+	b2BodyDef bodyDef;
+	bodyDef.type = b2_dynamicBody;
+	bodyDef.position.Set(0.0f, 4.0f);
+	b2Body* body = world.CreateBody(&bodyDef);
+
+	// Define another box shape for our dynamic body.
+	b2PolygonShape dynamicBox;
+	dynamicBox.SetAsBox(1.0f, 1.0f);
+
+	// Define the dynamic body fixture.
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &dynamicBox;
+
+	// Set the box density to be non-zero, so it will be dynamic.
+	fixtureDef.density = 1.0f;
+
+	// Override the default friction.
+	fixtureDef.friction = 0.3f;
+
+	// Add the shape to the body.
+	body->CreateFixture(&fixtureDef);
+
+	// Prepare for simulation. Typically we use a time step of 1/60 of a
+	// second (60Hz) and 10 iterations. This provides a high quality simulation
+	// in most game scenarios.
+	float32 timeStep = 1.0f / 60.0f;
+	int32 velocityIterations = 6;
+	int32 positionIterations = 2;
+}
 
