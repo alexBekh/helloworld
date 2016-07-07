@@ -258,6 +258,22 @@ void GameState::update()
 	if (!isStarted())
 		start();
 
+	Ball& b = c->getBall();
+	b2Vec2 ballPos = ball->GetPosition();
+	b.setPosition(ballPos.x, ballPos.y);
+	
+	static const float32 timeStep = 1.0f / 60.0f;
+	static const int32 velocityIterations = 6;
+	static const int32 positionIterations = 2;
+
+	world.Step(timeStep, velocityIterations, positionIterations);
+}
+
+void GameState::updateOld()
+{
+	if (!isStarted())
+		start();
+
 	c->getPlayer1().update();
 	c->getPlayer2().update();
 	c->getBall().update();
@@ -312,6 +328,8 @@ void GameState::start()
 	c->setState(std::make_shared<ReadySteadyGoState>(c));
 
 	State::start();
+
+	bindWithBox2d();
 }
 
 void GameState::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -324,11 +342,11 @@ void GameState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 void GameState::bindWithBox2d()
 {
-	b2Body* ground;
+	sf::FloatRect gf = c->getOptions().gameField;
 	{
 		b2BodyDef bd;
-		bd.position.Set(0.0f, 20.0f);
-		ground = world.CreateBody(&bd);
+		bd.position.Set(gf.left + gf.width/2, gf.top + gf.height/2);
+		field = world.CreateBody(&bd);
 
 		b2EdgeShape shape;
 
@@ -337,52 +355,55 @@ void GameState::bindWithBox2d()
 		sd.density = 0.0f;
 		sd.restitution = 0.4f;
 
-		c->getOptions().gameField;
+		b2Vec2 leftBottom(-gf.width / 2, -gf.height / 2)
+			, leftTop(-gf.width / 2, gf.height / 2)
+			, rightBottom(gf.width / 2, -gf.height / 2)
+			, rightTop(gf.width / 2, gf.height / 2);
+
 		// Left vertical
-		shape.Set(b2Vec2(-20.f, -20.0f), b2Vec2(-20.0f, 20.0f));
-		ground->CreateFixture(&sd);
+		shape.Set(leftBottom, leftTop);
+		field->CreateFixture(&sd);
 
 		// Right vertical
-		shape.Set(b2Vec2(20.0f, -20.0f), b2Vec2(20.0f, 20.0f));
-		ground->CreateFixture(&sd);
+		shape.Set(rightBottom, rightTop);
+		field->CreateFixture(&sd);
 
 		// Top horizontal
-		shape.Set(b2Vec2(-20.0f, 20.0f), b2Vec2(20.0f, 20.0f));
-		ground->CreateFixture(&sd);
+		shape.Set(leftTop, rightTop);
+		field->CreateFixture(&sd);
 
 		// Bottom horizontal
-		shape.Set(b2Vec2(-20.0f, -20.0f), b2Vec2(20.0f, -20.0f));
-		ground->CreateFixture(&sd);
+		shape.Set(leftBottom, rightBottom);
+		field->CreateFixture(&sd);
 	}
 
 	// Define the dynamic body. We set its position and call the body factory.
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_dynamicBody;
-	bodyDef.position.Set(0.0f, 4.0f);
-	b2Body* body = world.CreateBody(&bodyDef);
+	bodyDef.position.Set(gf.left + gf.width / 2, gf.top + gf.height / 2);
+	ball = world.CreateBody(&bodyDef);
 
 	// Define another box shape for our dynamic body.
-	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(1.0f, 1.0f);
+	b2CircleShape circle;
+	circle.m_p.Set(gf.left + gf.width / 2, gf.top + gf.height / 2);
+	circle.m_radius = c->getBall().ballShape.getRadius();
 
 	// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &dynamicBox;
+	fixtureDef.shape = &circle;
 
 	// Set the box density to be non-zero, so it will be dynamic.
-	fixtureDef.density = 1.0f;
+	fixtureDef.density = 10.f;
 
 	// Override the default friction.
 	fixtureDef.friction = 0.3f;
 
-	// Add the shape to the body.
-	body->CreateFixture(&fixtureDef);
+	fixtureDef.restitution = 0.5f;
 
-	// Prepare for simulation. Typically we use a time step of 1/60 of a
-	// second (60Hz) and 10 iterations. This provides a high quality simulation
-	// in most game scenarios.
-	float32 timeStep = 1.0f / 60.0f;
-	int32 velocityIterations = 6;
-	int32 positionIterations = 2;
+	// Add the shape to the body.
+	ball->CreateFixture(&fixtureDef);
 }
+
+
+
 

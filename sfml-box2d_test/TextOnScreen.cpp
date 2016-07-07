@@ -1,8 +1,7 @@
 #include "stdafx.h"
-#include "Ball.h"
+#include "TextOnScreen.h"
 
-
-namespace base 
+namespace base
 {
 	void TextOnScreen::create(const std::string& text, Size size)
 	{
@@ -47,7 +46,7 @@ namespace base
 		default:
 			break;
 		}
-		
+
 		Position horizontal = pos & Position::HORIZ;
 		switch (horizontal)
 		{
@@ -63,7 +62,7 @@ namespace base
 		default:
 			break;
 		}
-		
+
 		sf::Text::setPosition(center);
 	}
 
@@ -74,7 +73,7 @@ namespace base
 
 		const float halfWidth = getGlobalBounds().width / 2;
 		const float halfHeight = getGlobalBounds().height / 2;
-		
+
 		const float relHalfWidth = rel.getGlobalBounds().width / 2;
 		const float relHalfHeight = rel.getGlobalBounds().height / 2;
 
@@ -136,10 +135,16 @@ namespace base
 			charSize = diagonal / 10;
 			break;
 		case Size::MIDDLE:
-			charSize = diagonal / 20;
+			charSize = diagonal / 50;
 			break;
 		case Size::LITTLE:
-			charSize = diagonal / 30;
+			charSize = diagonal / 100;
+			break;
+		case Size::FIT:
+			setCharacterSize(10);
+			charSize = options.gameField.width / getLocalBounds().width * 10;
+			fitableSize = fitableSize? std::min(charSize, fitableSize) : charSize;
+			charSize = fitableSize;
 			break;
 		}
 		sf::Text::setCharacterSize(charSize);

@@ -140,6 +140,7 @@ public:
 
 	virtual void setEvent(const sf::Event& e) override;
 	virtual void update() override;
+	virtual void updateOld();
 	virtual void start() override;
 
 protected:
@@ -150,5 +151,6 @@ private:
 
 private:
 	b2World world;
+	b2Body *field, *p1, *p2, *ball;
 };
 
